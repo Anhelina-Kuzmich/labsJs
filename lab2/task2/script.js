@@ -2,7 +2,7 @@
 let min = 2;
 let max = 9;
 let isInDiapason = false;
-function checkIsInDiapason(num) {
+function checkIsInDiapason() {
   if (min > max) {
     console.log("change numbers");
   } else {
