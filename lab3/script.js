@@ -10,7 +10,7 @@ function findSum() {
   return sum;
 }
 let resultOfSum = findSum();
-console.log("Сума 50 перших натуральних чисел:", resultOfSum);
+console.log("1 Сума 50 перших натуральних чисел:", resultOfSum);
 // 2
 function findFactorial() {
   let factorial = 1;
@@ -21,7 +21,7 @@ function findFactorial() {
 }
 let numForFactorial = 5;
 let resultOfFactorial = findFactorial(numForFactorial);
-console.log("факторіал =", resultOfFactorial);
+console.log("2 факторіал =", resultOfFactorial);
 //3
 function numbToMonth() {
   let month;
@@ -69,7 +69,7 @@ function numbToMonth() {
 }
 let monthNumb = 11;
 let monthWord = numbToMonth(monthNumb);
-console.log(monthWord);
+console.log("3", monthWord);
 //4
 function findSumOfBinate() {
   let sum = 0;
@@ -82,7 +82,7 @@ function findSumOfBinate() {
 }
 let massive = [2, 5, 6, 8, 9];
 let binateSum = findSumOfBinate(massive);
-console.log(binateSum);
+console.log("4", binateSum);
 //5
 
 const countVowels = (str) => {
@@ -101,12 +101,7 @@ const countVowels = (str) => {
       char === "о" ||
       char === "у" ||
       char === "ю" ||
-      char === "я" ||
-      char === "a" ||
-      char === "e" ||
-      char === "i" ||
-      char === "o" ||
-      char === "u"
+      char === "я"
     ) {
       count++;
     }
@@ -115,7 +110,7 @@ const countVowels = (str) => {
   return count;
 };
 
-console.log(countVowels("Тратата"));
+console.log("5", countVowels("Тратата"));
 //6
 
 function findPower(base, exponent) {
@@ -124,4 +119,4 @@ function findPower(base, exponent) {
 let base = 3;
 let exponent = 2;
 let powerRes = findPower(base, exponent);
-console.log(powerRes);
+console.log("6", powerRes);
