@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="lampContainer">
+        <img id="lampImg" src="\images\lamp1Off.png" alt="Лампа" width="200">
+    </div>
+    <div class="selectorsContainer">
+        <button onclick="turnOn()">Увімкнути</button>
+        <button onclick="turnOff()">Вимкнути</button>
+        <button onclick="changeBrightness()">Змінити яскраість</button>
+    </div>
+    <div class="selectorsContainer">
+        <button onclick="selectLamp(1)">Лампа 1</button>
+        <button onclick="selectLamp(2)">Лампа 2</button>
+        <button onclick="selectLamp(3)">Лампа 3</button>
+    </div>
+
+    <div id="trafficLightContainer">
+        <img id="trafficLightImg" src="/images/trafficLightOff.png" alt="Світлофор" width="200">
+    </div>
+    <div id="trafficLightStatus">вимкнено</div>
+    <div class="selectorsContainer">
+        <button onclick="startTrafficLightAutoCycle()">Увімкнути</button>
+        <button onclick="stopTrafficLight()">Вимкнути</button>
+    </div>
+    <div class="selectorsContainer"> <button onclick="changeTrafficLightTimings()">Змінити час перемикання</button>
+        <button onclick="nextTrafficLightState()">Наступний стан</button>
+    </div>
+    <!-- Цифровий годинник -->
+    <div class="clock-container">
+        <div class="hoursContainer">
+            <img id="hourImg1" src="../images/0.png" alt="0">
+            <img id="hourImg2" src="../images/0.png" alt="0">
+        </div>
+        <span>:</span>
+        <div class="minutesContainer">
+            <img id="minuteImg1" src="../images/0.png" alt="0">
+            <img id="minuteImg2" src="../images/0.png" alt="0">
+        </div>
+        <span>:</span>
+        <div class="secoundsContainer">
+            <img id="secondImg1" src="../images/0.png" alt="0">
+            <img id="secondImg2" src="../images/0.png" alt="0">
+        </div>
+    </div>
+    <div class="countdown">
+        <h3>Таймер зворотного відліку</h3>
+        <input type="datetime-local" id="countdownTarget">
+        <button onclick="startCountdown()">Запустити таймер</button>
+        <div class="countdown-display">
+            <span id="countdownDays">0</span> дн.
+            <span id="countdownHours">00</span> год.
+            <span id="countdownMinutes">00</span> хв.
+            <span id="countdownSeconds">00</span> сек.
+        </div>
+    </div>
+    <div class="calendar-container">
+        <h3>Календар і день народження</h3>
+        <input type="month" id="monthPicker">
+        <div id="calendar" class="calendar"></div>
+        <div id="birthdayResult"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
