@@ -161,7 +161,9 @@ function clearOutput() {
   document.getElementById("output").innerHTML = "";
 }
 
-document.getElementById("add-product").addEventListener("click", function () {
+const addProductBtn = document.getElementById("add-product");
+
+addProductBtn.addEventListener("click", function () {
   const name = document.getElementById("product-name").value.trim();
   const price = Number(document.getElementById("product-price").value);
   const qtty = Number(document.getElementById("product-qtty").value);

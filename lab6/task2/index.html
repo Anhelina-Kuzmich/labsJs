@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Список завдань</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <main class="container">
+    <h1>Мій список завдань</h1>
+    <section class="add-section">
+      <form id="taskForm" novalidate>
+        <input type="text" id="taskInput" placeholder="Введіть нове завдання..." minlength="2" maxlength="200"
+          required />
+        <button type="submit" id="addBtn">Додати</button>
+      </form>
+      <p id="validationMsg" class="validation-msg" aria-live="polite"></p>
+    </section>
+    <section class="sort-section">
+      <label for="sortSelect">Сортувати:</label>
+      <select id="sortSelect">
+        <option value="date-added">За датою додавання</option>
+        <option value="date-updated">За датою оновлення</option>
+        <option value="status">За станом (виконані внизу)</option>
+      </select>
+    </section>
+    <section>
+      <ul id="taskList" aria-label="Список завдань"></ul>
+      <p id="emptyMsg" class="empty-msg">Список порожній. Додайте перше завдання!</p>
+    </section>
+  </main>
+  <div id="editModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <h2 id="modalTitle">Редагувати завдання</h2>
+      <input type="text" id="editInput" minlength="2" maxlength="200" required />
+      <p id="editValidationMsg" class="validation-msg" aria-live="polite"></p>
+      <div class="modal-buttons">
+        <button id="saveEditBtn">Зберегти</button>
+        <button id="cancelEditBtn" class="btn-secondary">Скасувати</button>
+      </div>
+    </div>
+  </div>
+  <div id="modalOverlay" class="modal-overlay"></div>
+  <div id="snackbar" class="snackbar" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

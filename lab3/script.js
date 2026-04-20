@@ -71,17 +71,22 @@ let monthNumb = 11;
 let monthWord = numbToMonth(monthNumb);
 console.log("3", monthWord);
 //4
-function findSumOfBinate() {
+function findSumOfBinate(array) {
   let sum = 0;
-  for (let i = 0; i < massive.length; i++) {
-    if (massive[i] % 2 == 0) {
-      sum = sum + massive[i];
+
+  if (!array.length) {
+    return sum = 0;
+  }
+
+  for (let i = 0; i < array.length; i++) {
+    if (array[i] % 2 == 0) {
+      sum = sum + array[i];
     }
   }
   return sum;
 }
-let massive = [2, 5, 6, 8, 9];
-let binateSum = findSumOfBinate(massive);
+let arr = [];
+let binateSum = findSumOfBinate(arr);
 console.log("4", binateSum);
 //5
 
@@ -113,7 +118,7 @@ const countVowels = (str) => {
 console.log("5", countVowels("Тратата"));
 //6
 
-function findPower(base, exponent) {
+function findPower() {
   return base ** exponent;
 }
 let base = 3;

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Каталог товарів</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">&</span>
+        <span class="logo-text">Маркет</span>
+      </div>
+      <div class="header-stats">
+        <div class="stat-block">
+          <span class="stat-label">Товарів</span>
+          <span class="stat-value" id="total-count">0</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-block">
+          <span class="stat-label">Загальна вартість</span>
+          <span class="stat-value" id="total-price">0 ₴</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="controls-section" aria-label="Керування списком товарів">
+    <div class="controls-inner">
+      <div class="control-group">
+        <span class="control-label">Категорія</span>
+        <div class="filter-buttons" id="filter-buttons" role="group" aria-label="Фільтрація по категорії"></div>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Сортування</span>
+        <div class="sort-buttons" role="group" aria-label="Сортування товарів">
+          <button class="sort-btn" data-sort="price">За ціною</button>
+          <button class="sort-btn" data-sort="created">За датою створення</button>
+          <button class="sort-btn" data-sort="updated">За датою оновлення</button>
+          <button class="sort-btn reset-btn" data-sort="reset">✕ Скинути</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main-content">
+    <div class="empty-state" id="empty-state" hidden>
+      <div class="empty-icon">⬡</div>
+      <p class="empty-text">Наразі список товарів пустий.<br>Додайте новий товар.</p>
+    </div>
+
+    <ul class="product-grid" id="product-list" aria-label="Список товарів"></ul>
+
+    <div class="add-btn-wrapper">
+      <button class="add-btn" id="add-btn" aria-haspopup="dialog">
+        <span class="add-btn-icon">+</span>
+        Додати новий товар
+      </button>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal">
+      <button class="modal-close" id="modal-close" aria-label="Закрити">✕</button>
+      <h2 class="modal-title" id="modal-title">Новий товар</h2>
+      <form class="product-form" id="product-form" novalidate>
+        <input type="hidden" id="edit-id" />
+        <div class="form-row">
+          <label for="field-name">Назва товару <span aria-hidden="true">*</span></label>
+          <input type="text" id="field-name" name="name" placeholder="Напр. Носки чорні"
+            required minlength="2" maxlength="100" autocomplete="off" />
+          <span class="field-error" id="err-name"></span>
+        </div>
+        <div class="form-row">
+          <label for="field-price">Ціна (₴) <span aria-hidden="true">*</span></label>
+          <input type="number" id="field-price" name="price" placeholder="0.00" required min="0.01" step="0.01" />
+          <span class="field-error" id="err-price"></span>
+        </div>
+        <div class="form-row">
+          <label for="field-category">Категорія <span aria-hidden="true">*</span></label>
+          <select id="field-category" name="category" required>
+            <option value="">— Оберіть категорію —</option>
+            <option value="Електроніка">Електроніка</option>
+            <option value="Одяг">Одяг</option>
+            <option value="Книги">Книги</option>
+            <option value="Меблі">Меблі</option>
+            <option value="Спорт">Спорт</option>
+          </select>
+          <span class="field-error" id="err-category"></span>
+        </div>
+        <div class="form-row">
+          <label for="field-image">Шлях до зображення <span aria-hidden="true">*</span></label>
+          <input type="text" id="field-image" name="image" placeholder="img/назва.jpg або https://..." required />
+          <span class="field-error" id="err-image"></span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="modal-cancel">Скасувати</button>
+          <button type="submit" class="btn-submit">Зберегти</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="snackbar-container" id="snackbar-container" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

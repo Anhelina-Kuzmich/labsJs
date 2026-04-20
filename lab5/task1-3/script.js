@@ -1,4 +1,3 @@
-// ==================== ЛАМПА ====================
 const lampStates = new Map();
 lampStates.set(1, false);
 lampStates.set(2, false);
@@ -9,9 +8,11 @@ let currentLamp = 1;
 const lampImg = document.getElementById("lampImg");
 const lampContainer = document.getElementById("lampContainer");
 
+const  baseImagePath = '../images/'
+
 function updateLampImage() {
   const isOn = lampStates.get(currentLamp);
-  if (isOn === true) {
+  if (isOn) {
     lampImg.src = "../images/lamp" + currentLamp + "On.png";
     lampContainer.classList.add("lamp-on");
   } else {
@@ -41,46 +42,50 @@ function turnOff() {
 
 function changeBrightness() {
   let brightnessLevel = Number(prompt("Напишіть рівень яскравості (0-5)"));
-  const element = document.querySelector(".lampContainer");
+
+  if (!lampContainer) return;
+
   if (brightnessLevel >= 0 && brightnessLevel <= 5) {
     switch (brightnessLevel) {
       case 0:
         turnOff();
+        lampContainer.style.width = "200px";
+        lampContainer.style.height = "200px";
         break;
       case 1:
         turnOn();
-        element.style.width = "200px";
-        element.style.height = "200px";
-        element.style.marginTop = "150px";
-        element.style.marginBottom = "150px";
+        lampContainer.style.width = "200px";
+        lampContainer.style.height = "200px";
+        lampContainer.style.marginTop = "150px";
+        lampContainer.style.marginBottom = "150px";
         break;
       case 2:
         turnOn();
-        element.style.width = "250px";
-        element.style.height = "250px";
-        element.style.marginTop = "125px";
-        element.style.marginBottom = "125px";
+        lampContainer.style.width = "250px";
+        lampContainer.style.height = "250px";
+        lampContainer.style.marginTop = "125px";
+        lampContainer.style.marginBottom = "125px";
         break;
       case 3:
         turnOn();
-        element.style.width = "300px";
-        element.style.height = "300px";
-        element.style.marginTop = "100px";
-        element.style.marginBottom = "100px";
+        lampContainer.style.width = "300px";
+        lampContainer.style.height = "300px";
+        lampContainer.style.marginTop = "100px";
+        lampContainer.style.marginBottom = "100px";
         break;
       case 4:
         turnOn();
-        element.style.width = "400px";
-        element.style.height = "400px";
-        element.style.marginTop = "50px";
-        element.style.marginBottom = "50px";
+        lampContainer.style.width = "400px";
+        lampContainer.style.height = "400px";
+        lampContainer.style.marginTop = "50px";
+        lampContainer.style.marginBottom = "50px";
         break;
       case 5:
         turnOn();
-        element.style.width = "500px";
-        element.style.height = "500px";
-        element.style.marginTop = "0px";
-        element.style.marginBottom = "0px";
+        lampContainer.style.width = "500px";
+        lampContainer.style.height = "500px";
+        lampContainer.style.marginTop = "0px";
+        lampContainer.style.marginBottom = "0px";
         break;
     }
   } else {
@@ -89,25 +94,27 @@ function changeBrightness() {
 }
 
 function autoTurnOff() {
-  setTimeout(turnOff, 3000);
+  setTimeout(turnOff, 70000);
   console.log("Автовимкнення через бездіяльність");
 }
 
-// ==================== СВІТЛОФОР ====================
 const trafficLightImg = document.getElementById("trafficLightImg");
 const trafficLightStatusDiv = document.getElementById("trafficLightStatus");
 
 let currentTLState = "off";
 let autoCycleActive = false;
 let autoTimer = null;
-let blinkInterval = null;
+let blinkInterval = null;``
 let blinkCompleteCallback = null;
 
-let timings = {
+const timings = {
   red: 5000,
   yellow: 2000,
   green: 5000,
 };
+
+const obj = timings;
+
 
 const BLINK_COUNT = 3;
 const BLINK_INTERVAL = 500;
@@ -157,7 +164,7 @@ function stopAutoTimer() {
   }
 }
 
-function stopBlinking() {
+const bl = function stopBlinking() {
   if (blinkInterval) {
     clearInterval(blinkInterval);
     blinkInterval = null;
@@ -332,7 +339,6 @@ function changeTrafficLightTimings() {
 updateTrafficLightImage();
 updateStatusText();
 
-// ==================== ЦИФРОВИЙ ГОДИННИК ====================
 const hourImg1 = document.getElementById("hourImg1");
 const hourImg2 = document.getElementById("hourImg2");
 const minuteImg1 = document.getElementById("minuteImg1");
@@ -357,11 +363,9 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-// ==================== МИГОТЛИВИЙ ІНДИКАТОР СЕКУНД ====================
 const secondsContainer = document.querySelector(".secoundsContainer");
 if (secondsContainer) secondsContainer.classList.add("blink");
 
-// ==================== ТАЙМЕР ЗВОРОТНОГО ВІДЛІКУ ====================
 let countdownInterval = null;
 let targetDate = null;
 
@@ -404,10 +408,7 @@ function startCountdown() {
   const inputElem = document.getElementById("countdownTarget");
   let inputValue = inputElem.value;
   if (!inputValue) {
-    inputValue = prompt(
-      "Введіть дату та час у форматі YYYY-MM-DDTHH:MM",
-      "2025-12-31T23:59"
-    );
+    inputValue = prompt("Введіть дату та час", "наприклад 2025-12-31 23:59");
     if (!inputValue) return;
   }
   const newTarget = new Date(inputValue);
@@ -425,7 +426,6 @@ function startCountdown() {
   countdownInterval = setInterval(updateCountdown, 1000);
 }
 
-// ==================== КАЛЕНДАР ====================
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
 let birthday = null;
@@ -497,7 +497,7 @@ function updateBirthdayCountdown() {
   }
   const diffMs = nextBirthday - now;
   if (diffMs <= 0) {
-    birthdayResult.textContent = "Сьогодні день народження! 🎉";
+    birthdayResult.textContent = "Сьогодні день народження!";
     return;
   }
 

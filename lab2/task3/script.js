@@ -21,26 +21,28 @@ let gradeMark = 0;
 textGrade = gradeToText(gradeMark);
 console.log("Ваша оцінка:", textGrade.textGrade);
 
-let season;
 function monthToSeason(month) {
-  let seasons = {
-    December: "Winter",
-    January: "Winter",
-    February: "Winter",
-    March: "Spring",
-    April: "Spring",
-    May: "Spring",
-    June: "Summer",
-    July: "Summer",
-    August: "Summer",
-    September: "Autumn",
-    October: "Autumn",
-    November: "Autumn",
-  };
-  const season = seasons[month] || "invalid input";
-  return { season: season };
+  let season;
+
+  if (month == "January" || month == "February" || month == "December") {
+    season = "Winter";
+  } else if (month == "Match" || month == "April" || month == "May") {
+    season = "Spring";
+  } else if (month == "June" || month == "July" || month == "August") {
+    season = "Summer";
+  } else if (
+    month == "September" ||
+    month == "October" ||
+    month == "November"
+  ) {
+    season = "Fall";
+  } else {
+    console.log("Month is wrong");
+  }
+  return season;
 }
 
 let month = "May";
-season = monthToSeason(month);
-console.log("Визначений сезон:", season.season);
+let season = monthToSeason(month);
+
+console.log(season);

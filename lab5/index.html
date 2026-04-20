@@ -1,0 +1,10 @@
+const products = [
+  { id: 1, name: 'Телефон', price: 500 },
+  { id: 2, name: 'Книга', price: 20 },
+  { id: 3, name: 'Ноутбук', price: 1200 },
+];
+
+const getTotalPrice(products){
+const total = products.reduce((sum, p) => sum + p.price, 0);
+return total;
+}
