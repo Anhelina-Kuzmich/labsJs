@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Слайдер з локальними фото + налаштування</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h2>Слайдер</h2>
+  <div class="slider" id="slider">
+    <div class="slider-track" id="track"></div>
+    <div class="slider-arrows" id="sliderArrows"></div>
+    <div class="slider-dots" id="sliderDots"></div>
+  </div>
+  <div class="config-panel">
+    <h3>Параметри слайдера</h3>
+    <div class="config-row">
+      <label>Швидкість анімації (ms):</label>
+      <input type="number" id="speedInput" min="100" max="1500" step="50" value="500">
+    </div>
+    <div class="config-row">
+      <label>Автопрокрутка:</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="autoplayCheckbox" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="config-row">
+      <label>Показати стрілки:</label>
+      <input type="checkbox" id="showArrowsCheckbox" checked>
+    </div>
+    <div class="config-row">
+      <label>Показати крапки:</label>
+      <input type="checkbox" id="showDotsCheckbox" checked>
+    </div>
+    <div class="config-row">
+      <label>Масив картинок:</label>
+      <input type="text" id="imagesInput" value="mountains,ocean,forest,city,desert">
+    </div>
+    <button id="applyConfigBtn" class="apply-btn">Застосувати налаштування</button>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

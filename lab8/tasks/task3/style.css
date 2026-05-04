@@ -1,0 +1,125 @@
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: linear-gradient(145deg, #f0f4fa 0%, #d9e2ec 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  margin: 0;
+}
+
+.kanban-container {
+  max-width: 1300px;
+  width: 100%;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(4px);
+  border-radius: 2rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+}
+
+h2 {
+  text-align: center;
+  color: #1e2f3f;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.board {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.column {
+  background: #f8fafd;
+  border-radius: 1.25rem;
+  width: 300px;
+  min-width: 260px;
+  flex: 1;
+  padding: 0.8rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255,255,255,0.6);
+  transition: all 0.2s;
+}
+
+.column-header {
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding: 0.6rem 0.8rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.column[data-status="todo"] .column-header { background: #ffe8df; color: #c24e00; border-left: 4px solid #ff8c42; }
+.column[data-status="working"] .column-header { background: #e2f0ff; color: #0056a7; border-left: 4px solid #3b82f6; }
+.column[data-status="done"] .column-header { background: #e4f5e6; color: #1f7840; border-left: 4px solid #2ecc71; }
+
+.task-list {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  cursor: grab;
+  transition: 0.1s linear;
+  border: 1px solid #e2edf7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.drag-handle {
+  cursor: grab;
+  font-size: 1.2rem;
+  color: #9aaebf;
+  padding-right: 8px;
+  user-select: none;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.task-text {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1e2a3a;
+}
+
+.task-card.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.task-list.drag-over {
+  background: rgba(59,130,246,0.1);
+  border-radius: 12px;
+  transition: 0.05s;
+}
+
+@media (max-width: 800px) {
+  .board { flex-direction: column; align-items: center; }
+  .column { width: 90%; }
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Pair Game 🐾</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app">
+
+    <div id="settings-panel" class="panel">
+      <h1 class="game-title">🐾 Memory Pair Game</h1>
+
+      <div class="settings-block">
+        <h2>Налаштування гри</h2>
+
+        <div class="setting-row">
+          <label>Кількість гравців:</label>
+          <div class="radio-group">
+            <label><input type="radio" name="players" value="1" checked /> 1 гравець</label>
+            <label><input type="radio" name="players" value="2" /> 2 гравці</label>
+          </div>
+        </div>
+
+        <div class="setting-row" id="player-names">
+          <div class="name-inputs">
+            <label>Ім'я гравця 1: <input type="text" id="player1-name" placeholder="Гравець 1" maxlength="20" /></label>
+            <label id="player2-name-label" class="hidden">Ім'я гравця 2: <input type="text" id="player2-name" placeholder="Гравець 2" maxlength="20" /></label>
+          </div>
+        </div>
+
+
+        <div class="setting-row">
+          <label>Розмір поля:</label>
+          <div class="grid-size-inputs">
+            <label>Рядків: <input type="number" id="rows-input" value="4" min="4" max="6" /></label>
+            <label>Стовпців: <input type="number" id="cols-input" value="4" min="4" max="6" /></label>
+            <span id="grid-warning" class="warning hidden">Потрібна парна кількість карток</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label>Складність:</label>
+          <div class="radio-group">
+            <label><input type="radio" name="difficulty" value="easy" checked />Easy (3 хв)</label>
+            <label><input type="radio" name="difficulty" value="normal" />Normal (2 хв)</label>
+            <label><input type="radio" name="difficulty" value="hard" />Hard (1 хв)</label>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label>Кількість раундів: <input type="number" id="rounds-input" value="1" min="1" max="10" /></label>
+        </div>
+
+        <div class="settings-buttons">
+          <button id="reset-settings-btn" class="btn btn-secondary">Скинути налаштування</button>
+          <button id="start-game-btn" class="btn btn-primary">Розпочати гру</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="game-panel" class="panel hidden">
+
+      <div id="game-header">
+        <h1 class="game-title">Memory Pair Game</h1>
+
+        <div id="round-info">
+          Раунд: <span id="current-round">1</span> / <span id="total-rounds">1</span>
+        </div>
+
+        <div id="scoreboard">
+          <div class="player-score" id="score-p1">
+            <span class="player-label" id="p1-label">Гравець 1</span>
+            <span class="score-val" id="p1-score">0</span>
+            <span class="moves-val">ходів: <span id="p1-moves">0</span></span>
+          </div>
+          <div class="player-score hidden" id="score-p2">
+            <span class="player-label" id="p2-label">Гравець 2</span>
+            <span class="score-val" id="p2-score">0</span>
+            <span class="moves-val">ходів: <span id="p2-moves">0</span></span>
+          </div>
+        </div>
+
+        <div id="game-status">
+          <div id="timer-display">⏱ <span id="timer-value">03:00</span></div>
+          <div id="current-turn-display"></div>
+        </div>
+
+        <div class="game-controls">
+          <button id="restart-btn" class="btn btn-secondary">Рестарт</button>
+          <button id="back-settings-btn" class="btn btn-outline">Налаштування</button>
+        </div>
+      </div>
+
+      <div id="board"></div>
+    </div>
+
+    <div id="results-panel" class="panel hidden">
+      <h1 class="game-title">Результати</h1>
+      <div id="results-content"></div>
+      <div class="settings-buttons">
+        <button id="play-again-btn" class="btn btn-primary">Грати ще раз</button>
+        <button id="new-settings-btn" class="btn btn-secondary">Нові налаштування</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
