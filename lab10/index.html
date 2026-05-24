@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FriendFinder | Соціальний пошук друзів</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-wrapper">
+    <div id="authContainer" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-user-astronaut"></i>
+                <h2>FriendFinder</h2>
+                <p>Увійдіть або створіть акаунт</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Вхід</button>
+                <button class="tab-btn" data-tab="register">Реєстрація</button>
+            </div>
+            <div id="loginForm" class="auth-form active">
+                <input type="text" id="loginUsername" placeholder="Ім'я користувача" autocomplete="off">
+                <input type="password" id="loginPassword" placeholder="Пароль">
+                <button id="loginBtn" class="auth-action-btn">Увійти <i class="fas fa-arrow-right-to-bracket"></i></button>
+                <div class="auth-note">Demo: будь-які дані (зберігається в localStorage)</div>
+            </div>
+            <div id="registerForm" class="auth-form">
+                <input type="text" id="regUsername" placeholder="Ім'я користувача">
+                <input type="password" id="regPassword" placeholder="Пароль">
+                <button id="registerBtn" class="auth-action-btn">Зареєструватися <i class="fas fa-user-plus"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="main-app hidden">
+        <header class="glass-header">
+            <div class="logo-area">
+                <i class="fas fa-user-friends"></i>
+                <h1>FriendFinder</h1>
+            </div>
+            <div class="user-info">
+                <span id="currentUserDisplay"><i class="fas fa-user-circle"></i> </span>
+                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Вийти</button>
+            </div>
+        </header>
+
+        <div class="controls-panel">
+            <div class="search-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchName" placeholder="Пошук за ім'ям... (debounce 250ms)">
+                </div>
+                <div class="filter-grid">
+                    <input type="text" id="filterLocation" placeholder="📍 Місто / Країна" class="filter-input">
+                    <input type="text" id="filterEmail" placeholder="✉️ Email" class="filter-input">
+                    <div class="range-group">
+                        <label>Вік: від</label>
+                        <input type="number" id="ageMin" placeholder="18" min="18" max="120">
+                        <label>до</label>
+                        <input type="number" id="ageMax" placeholder="80" min="18" max="120">
+                    </div>
+                    <div class="range-group">
+                        <label>Рік народж.:</label>
+                        <input type="number" id="yearMin" placeholder="1900">
+                        <label> - </label>
+                        <input type="number" id="yearMax" placeholder="2025">
+                    </div>
+                </div>
+                <button id="resetFiltersBtn" class="reset-filter-btn"><i class="fas fa-undo-alt"></i> Скинути фільтри</button>
+            </div>
+            <div class="sort-panel">
+                <span><i class="fas fa-sort"></i> Сортувати:</span>
+                <select id="sortSelect">
+                    <option value="name_asc">Ім'я (А → Я)</option>
+                    <option value="name_desc">Ім'я (Я → А)</option>
+                    <option value="age_asc">Вік (молодші↑)</option>
+                    <option value="age_desc">Вік (старші↓)</option>
+                    <option value="registered_asc">Дата реєстрації (нові↑)</option>
+                    <option value="registered_desc">Дата реєстрації (старі↓)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats-pagination">
+            <div class="stats" id="statsInfo"></div>
+            <div class="pagination-container" id="paginationControls"></div>
+        </div>
+
+        <div id="cardsContainer" class="cards-grid"></div>
+
+        <div id="loadingIndicator" class="loading-indicator hidden"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
+        <div id="errorToast" class="error-toast hidden"></div>
+
+        <div class="pagination-bottom" id="paginationBottom"></div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
