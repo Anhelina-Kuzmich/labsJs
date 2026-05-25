@@ -1,102 +1,139 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FriendFinder | Соціальний пошук друзів</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Лабораторна №10: Соціальний пошук друзів</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div class="app-wrapper">
-    <div id="authContainer" class="auth-overlay">
-        <div class="auth-card">
-            <div class="auth-header">
-                <i class="fas fa-user-astronaut"></i>
-                <h2>FriendFinder</h2>
-                <p>Увійдіть або створіть акаунт</p>
-            </div>
-            <div class="auth-tabs">
-                <button class="tab-btn active" data-tab="login">Вхід</button>
-                <button class="tab-btn" data-tab="register">Реєстрація</button>
-            </div>
-            <div id="loginForm" class="auth-form active">
-                <input type="text" id="loginUsername" placeholder="Ім'я користувача" autocomplete="off">
-                <input type="password" id="loginPassword" placeholder="Пароль">
-                <button id="loginBtn" class="auth-action-btn">Увійти <i class="fas fa-arrow-right-to-bracket"></i></button>
-                <div class="auth-note">Demo: будь-які дані (зберігається в localStorage)</div>
-            </div>
-            <div id="registerForm" class="auth-form">
-                <input type="text" id="regUsername" placeholder="Ім'я користувача">
-                <input type="password" id="regPassword" placeholder="Пароль">
-                <button id="registerBtn" class="auth-action-btn">Зареєструватися <i class="fas fa-user-plus"></i></button>
-            </div>
+<div class="auth-container" id="authContainer">
+    <div class="auth-card">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="register">Реєстрація</button>
+            <button class="tab-btn" data-tab="login">Вхід</button>
+        </div>
+        <div id="register-tab" class="form-container active">
+            <form id="registerForm" novalidate>
+                <h2>Створення облікового запису</h2>
+                <div class="form-group">
+                    <label>Ім'я *</label>
+                    <input type="text" id="regFirstName">
+                    <div class="error-msg" id="firstNameError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Прізвище *</label>
+                    <input type="text" id="regLastName">
+                    <div class="error-msg" id="lastNameError"></div>
+                </div>
+                <div class="form-group">
+                    <label>По батькові</label>
+                    <input type="text" id="regPatronymic">
+                    <div class="error-msg" id="patronymicError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="regEmail">
+                    <div class="error-msg" id="emailError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Пароль *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="regPassword" placeholder="мін. 6 символів">
+                        <i class="far fa-eye toggle-password" data-target="regPassword"></i>
+                    </div>
+                    <div class="error-msg" id="passwordError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Підтвердження пароля *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="regConfirmPassword">
+                        <i class="far fa-eye toggle-password" data-target="regConfirmPassword"></i>
+                    </div>
+                    <div class="error-msg" id="confirmPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Телефон *</label>
+                    <input type="tel" id="regPhone" placeholder="+380XXXXXXXXX">
+                    <div class="error-msg" id="phoneError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Дата народження *</label>
+                    <input type="date" id="regDob">
+                    <div class="error-msg" id="dobError"></div>
+                </div>
+                <div class="form-group radio-group">
+                    <label>Стать</label>
+                    <div class="radio-options">
+                        <label><input type="radio" name="sex" value="male"> Чоловік</label>
+                        <label><input type="radio" name="sex" value="female"> Жінка</label>
+                    </div>
+                    <div class="error-msg" id="sexError"></div>
+                </div>
+                <button type="submit" class="submit-btn">Зареєструватися</button>
+            </form>
+        </div>
+        <div id="login-tab" class="form-container">
+            <form id="loginForm" novalidate>
+                <h2>Вхід в акаунт</h2>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="text" id="loginUsername">
+                    <div class="error-msg" id="loginUsernameError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Пароль *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword">
+                        <i class="far fa-eye toggle-password" data-target="loginPassword"></i>
+                    </div>
+                    <div class="error-msg" id="loginPasswordError"></div>
+                </div>
+                <button type="submit" class="submit-btn">Увійти</button>
+            </form>
         </div>
     </div>
+</div>
 
-    <div id="mainApp" class="main-app hidden">
-        <header class="glass-header">
-            <div class="logo-area">
-                <i class="fas fa-user-friends"></i>
-                <h1>FriendFinder</h1>
-            </div>
-            <div class="user-info">
-                <span id="currentUserDisplay"><i class="fas fa-user-circle"></i> </span>
-                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Вийти</button>
-            </div>
-        </header>
-
-        <div class="controls-panel">
-            <div class="search-section">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchName" placeholder="Пошук за ім'ям... (debounce 250ms)">
-                </div>
-                <div class="filter-grid">
-                    <input type="text" id="filterLocation" placeholder="📍 Місто / Країна" class="filter-input">
-                    <input type="text" id="filterEmail" placeholder="✉️ Email" class="filter-input">
-                    <div class="range-group">
-                        <label>Вік: від</label>
-                        <input type="number" id="ageMin" placeholder="18" min="18" max="120">
-                        <label>до</label>
-                        <input type="number" id="ageMax" placeholder="80" min="18" max="120">
-                    </div>
-                    <div class="range-group">
-                        <label>Рік народж.:</label>
-                        <input type="number" id="yearMin" placeholder="1900">
-                        <label> - </label>
-                        <input type="number" id="yearMax" placeholder="2025">
-                    </div>
-                </div>
-                <button id="resetFiltersBtn" class="reset-filter-btn"><i class="fas fa-undo-alt"></i> Скинути фільтри</button>
-            </div>
-            <div class="sort-panel">
-                <span><i class="fas fa-sort"></i> Сортувати:</span>
-                <select id="sortSelect">
-                    <option value="name_asc">Ім'я (А → Я)</option>
-                    <option value="name_desc">Ім'я (Я → А)</option>
-                    <option value="age_asc">Вік (молодші↑)</option>
-                    <option value="age_desc">Вік (старші↓)</option>
-                    <option value="registered_asc">Дата реєстрації (нові↑)</option>
-                    <option value="registered_desc">Дата реєстрації (старі↓)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="stats-pagination">
-            <div class="stats" id="statsInfo"></div>
-            <div class="pagination-container" id="paginationControls"></div>
-        </div>
-
-        <div id="cardsContainer" class="cards-grid"></div>
-
-        <div id="loadingIndicator" class="loading-indicator hidden"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>
-        <div id="errorToast" class="error-toast hidden"></div>
-
-        <div class="pagination-bottom" id="paginationBottom"></div>
+<div class="app-container" id="appContainer">
+    <div class="app-header">
+        <div class="logo"><h2><i class="fas fa-user-friends"></i> FriendFinder</h2></div>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Вийти</button>
     </div>
+    <div class="controls-bar">
+        <div class="search-group">
+            <label><i class="fas fa-search"></i> Пошук (ім'я, email)</label>
+            <input type="text" id="searchInput" placeholder="Debounce пошук...">
+        </div>
+        <div class="sort-group">
+            <label>Сортувати</label>
+            <select id="sortSelect">
+                <option value="name_asc">Ім'я (А-Я)</option>
+                <option value="name_desc">Ім'я (Я-А)</option>
+                <option value="age_asc">Вік (зростання)</option>
+                <option value="age_desc">Вік (спадання)</option>
+                <option value="registered_asc">Дата реєстрації (старі)</option>
+                <option value="registered_desc">Дата реєстрації (нові)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Вік від / до</label>
+            <div class="age-range">
+                <input type="number" id="minAge" placeholder="мін" min="0" step="1">
+                <input type="number" id="maxAge" placeholder="макс" min="0" step="1">
+            </div>
+        </div>
+        <div class="filter-group">
+            <label>Країна</label>
+            <select id="countryFilter"><option value="">Всі країни</option></select>
+        </div>
+        <button class="clear-filters" id="clearFiltersBtn"><i class="fas fa-times"></i> Скинути</button>
+    </div>
+    <div class="friends-grid" id="friendsGrid"></div>
+    <div class="pagination" id="pagination"></div>
+    <div class="footer-note">Оберіть улюбленців — зберігаються в localStorage</div>
 </div>
 
 <script src="script.js"></script>

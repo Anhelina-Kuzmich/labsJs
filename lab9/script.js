@@ -1,6 +1,7 @@
 // script.js
 let regFirstName,
   regLastName,
+  regGivenName,
   regEmail,
   regPassword,
   regConfirmPassword,
@@ -10,6 +11,7 @@ let regFirstName,
   regCity;
 let firstNameError,
   lastNameError,
+  givenName,
   emailError,
   passwordError,
   confirmPasswordError,
@@ -98,8 +100,11 @@ const validateAge = (dateString) => {
   return { isValid: true, error: "" };
 };
 
+
 const validateSex = (sexValue) => {
-  return { isValid: true, error: "" };
+  if (!validateSex)
+    return { isValid: false, error: "виберіть стать" };
+    return { isValid: true, error: "" };
 };
 
 const validateCountry = (country) => {
@@ -160,6 +165,7 @@ function updateCityOptions(countryValue) {
 function validateRegistrationForm() {
   const firstNameVal = regFirstName.value.trim();
   const lastNameVal = regLastName.value.trim();
+  const givenNameVal = regGivenName.value.trim();
   const emailVal = regEmail.value.trim();
   const passwordVal = regPassword.value;
   const confirmVal = regConfirmPassword.value;
@@ -172,6 +178,7 @@ function validateRegistrationForm() {
   const cityVal = regCity.value;
   const nameValid = validateName(firstNameVal);
   const lastNameValid = validateName(lastNameVal);
+  const GivenNameValid = validateName(givenNameVal);  
   const emailValid = validateEmail(emailVal);
   const passwordValid = validatePassword(passwordVal);
   const confirmValid = validateConfirmPassword(passwordVal, confirmVal);
@@ -183,13 +190,23 @@ function validateRegistrationForm() {
 
   setFieldValidity(regFirstName, firstNameError, nameValid);
   setFieldValidity(regLastName, lastNameError, lastNameValid);
+    setFieldValidity(regGivenNameName, GivenNameError, GivenNameValid);
   setFieldValidity(regEmail, emailError, emailValid);
   setFieldValidity(regPassword, passwordError, passwordValid);
   setFieldValidity(regConfirmPassword, confirmPasswordError, confirmValid);
   setFieldValidity(regPhone, phoneError, phoneValid);
   setFieldValidity(regDob, dobError, ageValid);
 
-  sexError.textContent = "";
+  if(!sexValid.isValid){
+    sexError.textContent = sexError;
+    document.querySelector('.radio-group').classList.add('.invalid-group');
+  }else {
+
+    sexError.textContent = "";
+  document.querySelector('.radio-group').classList.remove('.invalid-group');
+  
+  }
+    
 
   setFieldValidity(regCountry, countryError, countryValid);
   setFieldValidity(regCity, cityError, cityValid);
@@ -197,10 +214,12 @@ function validateRegistrationForm() {
   return (
     nameValid.isValid &&
     lastNameValid.isValid &&
+    givenNameValid.isValid &&
     emailValid.isValid &&
     passwordValid.isValid &&
     confirmValid.isValid &&
     phoneValid.isValid &&
+    sexValid.isValid &&
     ageValid.isValid &&
     countryValid.isValid &&
     cityValid.isValid
@@ -210,6 +229,7 @@ function validateRegistrationForm() {
 function clearRegistrationForm() {
   regFirstName.value = "";
   regLastName.value = "";
+  regGivenName.value = "";
   regEmail.value = "";
   regPassword.value = "";
   regConfirmPassword.value = "";
@@ -260,6 +280,7 @@ function showLoginSuccess() {
 document.addEventListener("DOMContentLoaded", () => {
   regFirstName = document.getElementById("regFirstName");
   regLastName = document.getElementById("regLastName");
+  regGivenName = document.getElementById("regGivenName");  
   regEmail = document.getElementById("regEmail");
   regPassword = document.getElementById("regPassword");
   regConfirmPassword = document.getElementById("regConfirmPassword");
@@ -269,6 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
   regCity = document.getElementById("regCity");
   firstNameError = document.getElementById("firstNameError");
   lastNameError = document.getElementById("lastNameError");
+    givenNameError = document.getElementById("givenNameError");
   emailError = document.getElementById("emailError");
   passwordError = document.getElementById("passwordError");
   confirmPasswordError = document.getElementById("confirmPasswordError");
@@ -381,6 +403,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "lastNameError",
     (v) => v.trim()
   );
+    addBlurValidation(
+    "regGivenName",
+    (v) => validateName(v),
+    "GivenNameError",
+    (v) => v.trim()
+  );
+
   addBlurValidation(
     "regEmail",
     (v) => validateEmail(v),

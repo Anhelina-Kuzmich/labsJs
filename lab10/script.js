@@ -1,428 +1,406 @@
-let allUsers = [];
-let filteredUsers = [];
+// script.js
+let usersStore = JSON.parse(localStorage.getItem("app_users") || "[]");
+let currentUser = null;
+let currentUsers = [];
 let currentPage = 1;
-const itemsPerPage = 12;
-let currentSort = 'name_asc';
-let favorites = new Set();
-let authUser = null;
+let totalPages = 100;
+let isLoading = false;
+let currentFilters = { search: "", sort: "name_asc", minAge: "", maxAge: "", country: "" };
+let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-const authContainer = document.getElementById('authContainer');
-const mainApp = document.getElementById('mainApp');
-const cardsContainer = document.getElementById('cardsContainer');
-const searchInput = document.getElementById('searchName');
-const filterLocation = document.getElementById('filterLocation');
-const filterEmail = document.getElementById('filterEmail');
-const ageMin = document.getElementById('ageMin');
-const ageMax = document.getElementById('ageMax');
-const yearMin = document.getElementById('yearMin');
-const yearMax = document.getElementById('yearMax');
-const sortSelect = document.getElementById('sortSelect');
-const resetBtn = document.getElementById('resetFiltersBtn');
-const paginationControls = document.getElementById('paginationControls');
-const paginationBottom = document.getElementById('paginationBottom');
-const statsInfo = document.getElementById('statsInfo');
-const loadingIndicator = document.getElementById('loadingIndicator');
-const errorToast = document.getElementById('errorToast');
-const currentUserDisplay = document.getElementById('currentUserDisplay');
+const authContainer = document.getElementById("authContainer");
+const appContainer = document.getElementById("appContainer");
+const friendsGrid = document.getElementById("friendsGrid");
+const paginationDiv = document.getElementById("pagination");
+const searchInput = document.getElementById("searchInput");
+const sortSelect = document.getElementById("sortSelect");
+const minAgeInput = document.getElementById("minAge");
+const maxAgeInput = document.getElementById("maxAge");
+const countryFilter = document.getElementById("countryFilter");
+const clearBtn = document.getElementById("clearFiltersBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-function showError(message) {
-    errorToast.textContent = message;
-    errorToast.classList.remove('hidden');
-    setTimeout(() => errorToast.classList.add('hidden'), 3500);
+function saveUsersToStorage() { localStorage.setItem("app_users", JSON.stringify(usersStore)); }
+function saveFavorites() { localStorage.setItem("favorites", JSON.stringify(favorites)); }
+function setCurrentUser(user) { localStorage.setItem("currentUser", JSON.stringify(user)); currentUser = user; }
+function getCurrentUser() { return JSON.parse(localStorage.getItem("currentUser")); }
+function clearCurrentUser() { localStorage.removeItem("currentUser"); currentUser = null; }
+
+function validateName(name) {
+    if (!name || name.trim().length === 0) return { isValid: false, error: "Обов'язкове поле" };
+    const trimmed = name.trim();
+    if (trimmed.length < 2 || trimmed.length > 20) return { isValid: false, error: "2-20 символів" };
+    const regex = /^[A-Za-zА-Яа-яЄєІіЇїҐґ' -]+$/;
+    return regex.test(trimmed) ? { isValid: true, error: "" } : { isValid: false, error: "Тільки літери, дефіс, апостроф" };
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
+function validateEmail(email) {
+    if (!email) return { isValid: false, error: "Email обов'язковий" };
+    const re = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+    return re.test(email) ? { isValid: true, error: "" } : { isValid: false, error: "Неправильний формат email" };
+}
+
+function validatePassword(password) {
+    if (!password) return { isValid: false, error: "Пароль обов'язковий" };
+    return password.length >= 6 ? { isValid: true, error: "" } : { isValid: false, error: "Мінімум 6 символів" };
+}
+
+function validateConfirm(password, confirm) {
+    if (!confirm) return { isValid: false, error: "Підтвердіть пароль" };
+    return password === confirm ? { isValid: true, error: "" } : { isValid: false, error: "Паролі не співпадають" };
+}
+
+function validatePhone(phone) {
+    if (!phone) return { isValid: false, error: "Телефон обов'язковий" };
+    const cleaned = phone.replace(/\s/g, "");
+    const regex = /^\+380\d{9}$/;
+    return regex.test(cleaned) ? { isValid: true, error: "" } : { isValid: false, error: "Формат: +380XXXXXXXXX" };
+}
+
+function validateAge(dateStr) {
+    if (!dateStr) return { isValid: false, error: "Дата народження обов'язкова" };
+    const birth = new Date(dateStr);
+    const today = new Date();
+    if (birth > today) return { isValid: false, error: "Дата не може бути в майбутньому" };
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+    return age >= 12 ? { isValid: true, error: "" } : { isValid: false, error: "Має бути не менше 12 років" };
+}
+
+function setFieldValidity(input, errorEl, result) {
+    if (!input) return;
+    if (result.isValid) {
+        input.classList.add("valid");
+        input.classList.remove("invalid");
+        errorEl.textContent = "";
+    } else {
+        input.classList.add("invalid");
+        input.classList.remove("valid");
+        errorEl.textContent = result.error;
+    }
+}
+
+function handleRegister(e) {
+    e.preventDefault();
+    const firstName = document.getElementById("regFirstName").value.trim();
+    const lastName = document.getElementById("regLastName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const confirm = document.getElementById("regConfirmPassword").value;
+    const phone = document.getElementById("regPhone").value.trim();
+    const dob = document.getElementById("regDob").value;
+    const sex = document.querySelector('input[name="sex"]:checked')?.value || "";
+    const nameValid = validateName(firstName);
+    const lastValid = validateName(lastName);
+    const emailValid = validateEmail(email);
+    const pwdValid = validatePassword(password);
+    const confirmValid = validateConfirm(password, confirm);
+    const phoneValid = validatePhone(phone);
+    const ageValid = validateAge(dob);
+    const sexValid = sex ? { isValid: true } : { isValid: false, error: "Виберіть стать" };
+    setFieldValidity(document.getElementById("regFirstName"), document.getElementById("firstNameError"), nameValid);
+    setFieldValidity(document.getElementById("regLastName"), document.getElementById("lastNameError"), lastValid);
+    setFieldValidity(document.getElementById("regEmail"), document.getElementById("emailError"), emailValid);
+    setFieldValidity(document.getElementById("regPassword"), document.getElementById("passwordError"), pwdValid);
+    setFieldValidity(document.getElementById("regConfirmPassword"), document.getElementById("confirmPasswordError"), confirmValid);
+    setFieldValidity(document.getElementById("regPhone"), document.getElementById("phoneError"), phoneValid);
+    setFieldValidity(document.getElementById("regDob"), document.getElementById("dobError"), ageValid);
+    const sexError = document.getElementById("sexError");
+    if (!sexValid.isValid) sexError.textContent = sexValid.error;
+    else sexError.textContent = "";
+    if (nameValid.isValid && lastValid.isValid && emailValid.isValid && pwdValid.isValid && confirmValid.isValid && phoneValid.isValid && ageValid.isValid && sexValid.isValid) {
+        const newUser = { id: Date.now(), firstName, lastName, email, password, phone, dob, sex, registeredAt: new Date().toISOString() };
+        usersStore.push(newUser);
+        saveUsersToStorage();
+        setCurrentUser({ email, name: firstName + " " + lastName });
+        showAppAfterAuth();
+    }
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    const loginVal = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const pwdValid = validatePassword(password);
+    const emailValid = validateEmail(loginVal);
+    const usernameError = document.getElementById("loginUsernameError");
+    const passwordError = document.getElementById("loginPasswordError");
+    let isValid = true;
+    if (!emailValid.isValid) {
+        usernameError.textContent = emailValid.error;
+        isValid = false;
+    } else {
+        usernameError.textContent = "";
+    }
+    if (!pwdValid.isValid) {
+        passwordError.textContent = pwdValid.error;
+        isValid = false;
+    } else {
+        passwordError.textContent = "";
+    }
+    if (isValid) {
+        let user = usersStore.find(u => u.email === loginVal);
+        if (!user) {
+            user = { id: Date.now(), firstName: "Користувач", lastName: "", email: loginVal, password: password };
+            usersStore.push(user);
+            saveUsersToStorage();
+        }
+        setCurrentUser({ email: user.email, name: (user.firstName || "Користувач") + " " + (user.lastName || "") });
+        showAppAfterAuth();
+    }
+}
+
+function showAppAfterAuth() {
+    authContainer.style.display = "none";
+    appContainer.style.display = "block";
+    initApp();
+}
+
+function logout() {
+    clearCurrentUser();
+    authContainer.style.display = "block";
+    appContainer.style.display = "none";
+    window.location.reload();
+}
+
+function toggleFavorite(uuid) {
+    if (favorites.includes(uuid)) favorites = favorites.filter(id => id !== uuid);
+    else favorites.push(uuid);
+    saveFavorites();
+    renderCards(currentUsers);
+}
+
+function applyFiltersAndSort(usersArray) {
+    let filtered = [...usersArray];
+    const search = currentFilters.search.toLowerCase();
+    if (search) {
+        filtered = filtered.filter(u => u.name.first.toLowerCase().includes(search) || u.name.last.toLowerCase().includes(search) || u.email.toLowerCase().includes(search));
+    }
+    if (currentFilters.minAge) {
+        const min = parseInt(currentFilters.minAge);
+        if (!isNaN(min) && min >= 0) filtered = filtered.filter(u => u.dob.age >= min);
+    }
+    if (currentFilters.maxAge) {
+        const max = parseInt(currentFilters.maxAge);
+        if (!isNaN(max) && max >= 0) filtered = filtered.filter(u => u.dob.age <= max);
+    }
+    if (currentFilters.country) {
+        filtered = filtered.filter(u => u.location.country === currentFilters.country);
+    }
+    const [field, order] = currentFilters.sort.split('_');
+    filtered.sort((a, b) => {
+        if (field === "name") {
+            const valA = (a.name.first + a.name.last).toLowerCase();
+            const valB = (b.name.first + b.name.last).toLowerCase();
+            return order === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else if (field === "age") {
+            return order === "asc" ? a.dob.age - b.dob.age : b.dob.age - a.dob.age;
+        } else if (field === "registered") {
+            const dateA = new Date(a.registered.date);
+            const dateB = new Date(b.registered.date);
+            return order === "asc" ? dateA - dateB : dateB - dateA;
+        }
+        return 0;
     });
+    return filtered;
 }
 
-function validateYearInput(inputEl) {
-    let value = parseInt(inputEl.value);
-    const currentYear = new Date().getFullYear();
-    if (isNaN(value)) return '';
-    if (value < 1900) value = 1900;
-    if (value > currentYear) value = currentYear;
-    inputEl.value = value;
-    return value;
-}
-
-function validateAgeInput(inputEl) {
-    let value = parseInt(inputEl.value);
-    if (isNaN(value)) return '';
-    if (value < 18) value = 18;
-    if (value > 120) value = 120;
-    inputEl.value = value;
-    return value;
-}
-
-[yearMin, yearMax].forEach(inp => {
-    if (inp) {
-        inp.addEventListener('blur', () => validateYearInput(inp));
-        inp.addEventListener('input', function() {
-            let v = parseInt(this.value);
-            if (!isNaN(v) && (v < 1900 || v > new Date().getFullYear())) {
-                this.style.borderColor = '#f87171';
-            } else { this.style.borderColor = '#2c4c5e'; }
-        });
-    }
-});
-[ageMin, ageMax].forEach(inp => {
-    if (inp) inp.addEventListener('blur', () => validateAgeInput(inp));
-});
-
-async function fetchUsers() {
-    loadingIndicator.classList.remove('hidden');
-    try {
-        const response = await fetch('https://randomuser.me/api/?results=200&inc=gender,name,location,email,phone,cell,picture,dob,registered,login,id&nat=us,fr,gb,ua');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        allUsers = data.results.map(user => {
-            const age = user.dob.age;
-            const birthYear = new Date(user.dob.date).getFullYear();
-            const registeredDate = new Date(user.registered.date);
-            return { ...user, age, birthYear, registeredDate };
-        });
-        applyFiltersAndSort();
-    } catch (err) {
-        showError('Помилка завантаження даних. Спробуйте пізніше.');
-        console.error(err);
-    } finally {
-        loadingIndicator.classList.add('hidden');
-    }
-}
-
-function filterUsers(users, filters) {
-    return users.filter(user => {
-        const fullName = `${user.name.first} ${user.name.last}`.toLowerCase();
-        if (filters.search && !fullName.includes(filters.search.toLowerCase())) return false;
-        const locationStr = `${user.location.city}, ${user.location.country}`.toLowerCase();
-        if (filters.location && !locationStr.includes(filters.location.toLowerCase())) return false;
-        if (filters.email && !user.email.toLowerCase().includes(filters.email.toLowerCase())) return false;
-        if (filters.ageMin !== '' && user.age < parseInt(filters.ageMin)) return false;
-        if (filters.ageMax !== '' && user.age > parseInt(filters.ageMax)) return false;
-        if (filters.yearMin !== '' && user.birthYear < parseInt(filters.yearMin)) return false;
-        if (filters.yearMax !== '' && user.birthYear > parseInt(filters.yearMax)) return false;
-        return true;
-    });
-}
-
-function sortUsers(users, sortKey) {
-    const sorted = [...users];
-    switch (sortKey) {
-        case 'name_asc': sorted.sort((a,b) => (a.name.first+' '+a.name.last).localeCompare(b.name.first+' '+b.name.last)); break;
-        case 'name_desc': sorted.sort((a,b) => (b.name.first+' '+b.name.last).localeCompare(a.name.first+' '+a.name.last)); break;
-        case 'age_asc': sorted.sort((a,b) => a.age - b.age); break;
-        case 'age_desc': sorted.sort((a,b) => b.age - a.age); break;
-        case 'registered_asc': sorted.sort((a,b) => b.registeredDate - a.registeredDate); break;
-        case 'registered_desc': sorted.sort((a,b) => a.registeredDate - b.registeredDate); break;
-        default: return sorted;
-    }
-    return sorted;
-}
-
-function getFilters() {
-    let ageMinVal = ageMin.value ? parseInt(ageMin.value) : '';
-    let ageMaxVal = ageMax.value ? parseInt(ageMax.value) : '';
-    let yearMinVal = yearMin.value ? parseInt(yearMin.value) : '';
-    let yearMaxVal = yearMax.value ? parseInt(yearMax.value) : '';
-    if (ageMinVal !== '' && (ageMinVal < 18 || ageMinVal > 120)) ageMinVal = 18;
-    if (ageMaxVal !== '' && (ageMaxVal < 18 || ageMaxVal > 120)) ageMaxVal = 120;
-    const currentYear = new Date().getFullYear();
-    if (yearMinVal !== '' && (yearMinVal < 1900 || yearMinVal > currentYear)) yearMinVal = 1900;
-    if (yearMaxVal !== '' && (yearMaxVal < 1900 || yearMaxVal > currentYear)) yearMaxVal = currentYear;
-    return {
-        search: searchInput.value,
-        location: filterLocation.value,
-        email: filterEmail.value,
-        ageMin: ageMinVal,
-        ageMax: ageMaxVal,
-        yearMin: yearMinVal,
-        yearMax: yearMaxVal,
-    };
-}
-
-function updateURL() {
-    const filters = getFilters();
-    const params = new URLSearchParams();
-    if (currentPage > 1) params.set('page', currentPage);
-    if (currentSort !== 'name_asc') params.set('sort', currentSort);
-    if (filters.search) params.set('search', filters.search);
-    if (filters.location) params.set('loc', filters.location);
-    if (filters.email) params.set('email', filters.email);
-    if (filters.ageMin) params.set('ageMin', filters.ageMin);
-    if (filters.ageMax) params.set('ageMax', filters.ageMax);
-    if (filters.yearMin) params.set('yearMin', filters.yearMin);
-    if (filters.yearMax) params.set('yearMax', filters.yearMax);
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.pushState({ page: currentPage, sort: currentSort, filters }, '', newUrl);
-}
-
-function applyFiltersAndSort() {
-    if (!allUsers.length) return;
-    const filters = getFilters();
-    let filtered = filterUsers(allUsers, filters);
-    filtered = sortUsers(filtered, currentSort);
-    filteredUsers = filtered;
-    renderPagination();
-    renderCurrentPage();
-    updateStats();
-    updateURL();
-}
-
-function renderCurrentPage() {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageUsers = filteredUsers.slice(start, end);
-    renderCards(pageUsers);
-}
-
-function renderCards(users) {
-    if (!users.length) {
-        cardsContainer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;">😢 Друзів не знайдено за критеріями</div>`;
+function renderCards(usersRaw) {
+    const filteredList = applyFiltersAndSort(usersRaw);
+    if (filteredList.length === 0) {
+        friendsGrid.innerHTML = `<div style="color:white; grid-column:1/-1; text-align:center;">Немає користувачів за критеріями</div>`;
         return;
     }
-    const fallbackImg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2314b8a6'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white'%3E📷%3C/text%3E%3C/svg%3E";
-    cardsContainer.innerHTML = users.map(user => {
+    friendsGrid.innerHTML = filteredList.map(user => {
         const fullName = `${user.name.first} ${user.name.last}`;
-        const locationStr = `${user.location?.city || '?'}, ${user.location?.country || '?'}`;
-        const isFav = favorites.has(user.login.uuid);
-        const avatarUrl = user.picture?.large || '';
+        const isFav = favorites.includes(user.login.uuid);
         return `
-            <div class="user-card" data-id="${user.login.uuid}">
-                <div class="card-header">
-                    <img class="user-avatar" src="${avatarUrl}" alt="${fullName}" 
-                         onerror="this.onerror=null; this.src='${fallbackImg}';">
-                    <button class="fav-btn ${isFav ? 'favorited' : ''}" data-uuid="${user.login.uuid}">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="user-name">${escapeHtml(fullName)}</div>
-                    <div class="user-age">${user.age ?? '?'} років</div>
-                    <div class="user-detail"><i class="fas fa-phone"></i> ${user.phone || '—'}</div>
-                    <div class="user-detail"><i class="fas fa-envelope"></i> ${user.email || '—'}</div>
-                    <div class="user-detail"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(locationStr)}</div>
-                    <div class="user-detail"><i class="fas fa-calendar-alt"></i> Рік народж.: ${user.birthYear ?? '—'}</div>
+            <div class="friend-card">
+                <div class="card-img"><img src="${user.picture.large}" alt="photo" loading="lazy"></div>
+                <div class="card-info">
+                    <h3>${fullName} <button class="favorite-btn ${isFav ? 'active' : ''}" data-uuid="${user.login.uuid}"><i class="fas fa-heart"></i></button></h3>
+                    <div class="info-row"><i class="fas fa-calendar-alt"></i> Вік: ${user.dob.age} р.</div>
+                    <div class="info-row"><i class="fas fa-phone"></i> ${user.phone}</div>
+                    <div class="info-row"><i class="fas fa-envelope"></i> ${user.email}</div>
+                    <div class="info-row"><i class="fas fa-map-marker-alt"></i> ${user.location.city}, ${user.location.country}</div>
+                    <div class="info-row"><i class="fas fa-clock"></i> Реєстрація: ${new Date(user.registered.date).toLocaleDateString()}</div>
                 </div>
             </div>
         `;
     }).join('');
-    document.querySelectorAll('.fav-btn').forEach(btn => {
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const uuid = btn.dataset.uuid;
+            const uuid = btn.getAttribute('data-uuid');
             toggleFavorite(uuid);
         });
     });
 }
 
-function toggleFavorite(uuid) {
-    if (favorites.has(uuid)) favorites.delete(uuid);
-    else favorites.add(uuid);
-    localStorage.setItem(`favorites_${authUser}`, JSON.stringify([...favorites]));
-    renderCurrentPage();
+async function fetchUsers(page = 1) {
+    isLoading = true;
+    friendsGrid.innerHTML = '<div class="loader"><i class="fas fa-spinner fa-pulse"></i> Завантаження...</div>';
+    try {
+        const res = await fetch(`https://randomuser.me/api/?page=${page}&results=30&seed=lab10seed&inc=name,email,phone,picture,location,dob,registered,login`);
+        if (!res.ok) throw new Error("Помилка API");
+        const data = await res.json();
+        currentUsers = data.results;
+        const countriesSet = new Set(currentUsers.map(u => u.location.country));
+        const currentCountry = countryFilter.value;
+        countryFilter.innerHTML = '<option value="">Всі країни</option>' + Array.from(countriesSet).map(c => `<option value="${c}">${c}</option>`).join('');
+        if (currentCountry && countriesSet.has(currentCountry)) countryFilter.value = currentCountry;
+        else countryFilter.value = currentFilters.country = "";
+        renderCards(currentUsers);
+    } catch (err) {
+        friendsGrid.innerHTML = `<div class="error-toast">Помилка завантаження: ${err.message}</div>`;
+    } finally {
+        isLoading = false;
+    }
+}
+
+function updateURLAndHistory() {
+    const params = new URLSearchParams();
+    params.set('page', currentPage);
+    if (currentFilters.search) params.set('search', currentFilters.search);
+    if (currentFilters.sort !== "name_asc") params.set('sort', currentFilters.sort);
+    if (currentFilters.minAge) params.set('minAge', currentFilters.minAge);
+    if (currentFilters.maxAge) params.set('maxAge', currentFilters.maxAge);
+    if (currentFilters.country) params.set('country', currentFilters.country);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({}, '', newUrl);
+}
+
+function loadFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentPage = parseInt(urlParams.get('page')) || 1;
+    currentFilters.search = urlParams.get('search') || "";
+    currentFilters.sort = urlParams.get('sort') || "name_asc";
+    currentFilters.minAge = urlParams.get('minAge') || "";
+    currentFilters.maxAge = urlParams.get('maxAge') || "";
+    currentFilters.country = urlParams.get('country') || "";
+    searchInput.value = currentFilters.search;
+    sortSelect.value = currentFilters.sort;
+    minAgeInput.value = currentFilters.minAge;
+    maxAgeInput.value = currentFilters.maxAge;
+    if (currentFilters.country) setTimeout(() => { if(countryFilter) countryFilter.value = currentFilters.country; }, 100);
+}
+
+function updateFromUIAndFetch() {
+    currentFilters.search = searchInput.value;
+    currentFilters.sort = sortSelect.value;
+    let minAge = minAgeInput.value;
+    let maxAge = maxAgeInput.value;
+    if (minAge !== "") {
+        let min = parseInt(minAge);
+        if (isNaN(min) || min < 0) minAge = "";
+        else minAge = min.toString();
+    }
+    if (maxAge !== "") {
+        let max = parseInt(maxAge);
+        if (isNaN(max) || max < 0) maxAge = "";
+        else maxAge = max.toString();
+    }
+    currentFilters.minAge = minAge;
+    currentFilters.maxAge = maxAge;
+    currentFilters.country = countryFilter.value;
+    updateURLAndHistory();
+    fetchUsers(currentPage);
+}
+
+function debounce(fn, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
 }
 
 function renderPagination() {
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    if (totalPages <= 1) {
-        paginationControls.innerHTML = '';
-        paginationBottom.innerHTML = '';
-        return;
+    let pagesHtml = `<button class="page-btn" data-page="${currentPage-1}" ${currentPage<=1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+    let start = Math.max(1, currentPage-2);
+    let end = Math.min(totalPages, currentPage+2);
+    for(let i=start; i<=end; i++) {
+        pagesHtml += `<button class="page-btn ${i===currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
     }
-    const createButtons = (container) => {
-        let html = '';
-        for (let i = 1; i <= totalPages; i++) {
-            html += `<button class="page-btn ${currentPage === i ? 'active-page' : ''}" data-page="${i}">${i}</button>`;
-        }
-        container.innerHTML = html;
-        container.querySelectorAll('.page-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentPage = parseInt(btn.dataset.page);
-                renderCurrentPage();
-                renderPagination();
-                updateURL();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                addUIFeedback(btn);
-            });
+    pagesHtml += `<button class="page-btn" data-page="${currentPage+1}" ${currentPage>=totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+    paginationDiv.innerHTML = pagesHtml;
+    document.querySelectorAll('.page-btn[data-page]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            let newPage = parseInt(btn.getAttribute('data-page'));
+            if(!isNaN(newPage) && newPage>=1 && newPage<=totalPages && newPage !== currentPage) {
+                currentPage = newPage;
+                updateURLAndHistory();
+                fetchUsers(currentPage).then(() => renderPagination());
+            }
         });
-    };
-    createButtons(paginationControls);
-    createButtons(paginationBottom);
-}
-
-function addUIFeedback(element) {
-    if (!element) return;
-    element.style.transform = 'scale(0.96)';
-    setTimeout(() => { if(element) element.style.transform = ''; }, 150);
-}
-
-function updateStats() {
-    statsInfo.innerHTML = `<i class="fas fa-users"></i> Показано ${filteredUsers.length} з ${allUsers.length} друзів | Сторінка ${currentPage}`;
-}
-
-let isLoadingMore = false;
-function handleScroll() {
-    if (filteredUsers.length === 0) return;
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    if (currentPage >= totalPages) return;
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const threshold = document.documentElement.scrollHeight - 300;
-    if (scrollPosition >= threshold && !isLoadingMore) {
-        isLoadingMore = true;
-        currentPage++;
-        renderCurrentPage();
-        renderPagination();
-        updateURL();
-        setTimeout(() => { isLoadingMore = false; }, 300);
-    }
-}
-
-// ========== DEBOUNCE exactly as in pizza search example ==========
-function debounce(callee, timeoutMs) {
-    return function perform(...args) {
-        let previousCall = this.lastCall;
-        this.lastCall = Date.now();
-        if (previousCall && ((this.lastCall - previousCall) <= timeoutMs)) {
-            clearTimeout(this.lastCallTimer);
-        }
-        this.lastCallTimer = setTimeout(() => callee(...args), timeoutMs);
-    };
-}
-// =================================================================
-
-function handleSearchInput(e) {
-    currentPage = 1;
-    applyFiltersAndSort();
-    addUIFeedback(searchInput);
-}
-const debouncedSearch = debounce(handleSearchInput, 250);
-searchInput.addEventListener('input', debouncedSearch);
-
-function syncFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('page')) currentPage = parseInt(params.get('page')) || 1;
-    if (params.has('sort')) currentSort = params.get('sort');
-    sortSelect.value = currentSort;
-    if (params.has('search')) searchInput.value = params.get('search');
-    if (params.has('loc')) filterLocation.value = params.get('loc');
-    if (params.has('email')) filterEmail.value = params.get('email');
-    if (params.has('ageMin')) ageMin.value = params.get('ageMin');
-    if (params.has('ageMax')) ageMax.value = params.get('ageMax');
-    if (params.has('yearMin')) yearMin.value = params.get('yearMin');
-    if (params.has('yearMax')) yearMax.value = params.get('yearMax');
-    applyFiltersAndSort();
-}
-
-function triggerSortEffect() {
-    sortSelect.classList.add('sort-effect');
-    setTimeout(() => sortSelect.classList.remove('sort-effect'), 300);
-}
-
-filterLocation.addEventListener('input', () => { currentPage = 1; applyFiltersAndSort(); addUIFeedback(filterLocation); });
-filterEmail.addEventListener('input', () => { currentPage = 1; applyFiltersAndSort(); addUIFeedback(filterEmail); });
-ageMin.addEventListener('input', () => { currentPage = 1; applyFiltersAndSort(); addUIFeedback(ageMin); });
-ageMax.addEventListener('input', () => { currentPage = 1; applyFiltersAndSort(); addUIFeedback(ageMax); });
-yearMin.addEventListener('input', () => { currentPage = 1; applyFiltersAndSort(); addUIFeedback(yearMin); });
-yearMax.addEventListener('input', () => { currentPage = 1; applyFiltersAndSort(); addUIFeedback(yearMax); });
-sortSelect.addEventListener('change', (e) => { currentSort = e.target.value; currentPage = 1; applyFiltersAndSort(); triggerSortEffect(); });
-resetBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    filterLocation.value = '';
-    filterEmail.value = '';
-    ageMin.value = '';
-    ageMax.value = '';
-    yearMin.value = '';
-    yearMax.value = '';
-    currentSort = 'name_asc';
-    sortSelect.value = 'name_asc';
-    currentPage = 1;
-    applyFiltersAndSort();
-    addUIFeedback(resetBtn);
-});
-
-window.addEventListener('popstate', (e) => {
-    if (e.state) {
-        currentPage = e.state.page || 1;
-        currentSort = e.state.sort || 'name_asc';
-        sortSelect.value = currentSort;
-        syncFromURL();
-    } else {
-        syncFromURL();
-    }
-});
-window.addEventListener('scroll', handleScroll);
-
-function loadFavorites() {
-    const stored = localStorage.getItem(`favorites_${authUser}`);
-    if (stored) favorites = new Set(JSON.parse(stored));
-    else favorites = new Set();
-}
-
-function initAuth() {
-    const storedUser = localStorage.getItem('friendfinder_user');
-    if (storedUser) {
-        authUser = storedUser;
-        authContainer.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        currentUserDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${authUser}`;
-        loadFavorites();
-        fetchUsers();
-    } else {
-        authContainer.classList.remove('hidden');
-        mainApp.classList.add('hidden');
-    }
-}
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-        document.getElementById('registerForm').classList.toggle('active', tab === 'register');
-        addUIFeedback(btn);
     });
+}
+
+function setupEventListeners() {
+    const debouncedSearch = debounce(() => { currentPage = 1; updateFromUIAndFetch(); }, 350);
+    searchInput.addEventListener('input', debouncedSearch);
+    sortSelect.addEventListener('change', () => { currentPage = 1; updateFromUIAndFetch(); });
+    minAgeInput.addEventListener('input', () => { currentPage = 1; updateFromUIAndFetch(); });
+    maxAgeInput.addEventListener('input', () => { currentPage = 1; updateFromUIAndFetch(); });
+    countryFilter.addEventListener('change', () => { currentPage = 1; updateFromUIAndFetch(); });
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = "";
+        sortSelect.value = "name_asc";
+        minAgeInput.value = "";
+        maxAgeInput.value = "";
+        countryFilter.value = "";
+        currentFilters = { search: "", sort: "name_asc", minAge: "", maxAge: "", country: "" };
+        currentPage = 1;
+        updateFromUIAndFetch();
+    });
+}
+
+async function initApp() {
+    loadFromURL();
+    await fetchUsers(currentPage);
+    setupEventListeners();
+    renderPagination();
+    favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+}
+
+window.addEventListener('popstate', () => {
+    loadFromURL();
+    fetchUsers(currentPage).then(() => renderPagination());
 });
 
-document.getElementById('loginBtn').addEventListener('click', () => {
-    const username = document.getElementById('loginUsername').value.trim();
-    if (!username) { showError('Введіть ім\'я'); return; }
-    localStorage.setItem('friendfinder_user', username);
-    authUser = username;
-    authContainer.classList.add('hidden');
-    mainApp.classList.remove('hidden');
-    currentUserDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${authUser}`;
-    loadFavorites();
-    fetchUsers();
-    addUIFeedback(document.getElementById('loginBtn'));
+document.addEventListener("DOMContentLoaded", () => {
+    if (getCurrentUser()) {
+        authContainer.style.display = "none";
+        appContainer.style.display = "block";
+        initApp();
+    } else {
+        authContainer.style.display = "block";
+        appContainer.style.display = "none";
+    }
+    document.getElementById("registerForm").addEventListener("submit", handleRegister);
+    document.getElementById("loginForm").addEventListener("submit", handleLogin);
+    document.querySelectorAll(".toggle-password").forEach(icon => {
+        icon.addEventListener("click", function() {
+            const target = document.getElementById(this.getAttribute("data-target"));
+            if (target.type === "password") {
+                target.type = "text";
+                this.classList.remove("fa-eye");
+                this.classList.add("fa-eye-slash");
+            } else {
+                target.type = "password";
+                this.classList.remove("fa-eye-slash");
+                this.classList.add("fa-eye");
+            }
+        });
+    });
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.querySelectorAll(".form-container").forEach(c => c.classList.remove("active"));
+            document.getElementById(btn.getAttribute("data-tab") + "-tab").classList.add("active");
+        });
+    });
+    if (logoutBtn) logoutBtn.addEventListener("click", logout);
 });
-document.getElementById('registerBtn').addEventListener('click', () => {
-    const username = document.getElementById('regUsername').value.trim();
-    if (!username) { showError('Введіть ім\'я'); return; }
-    localStorage.setItem('friendfinder_user', username);
-    authUser = username;
-    authContainer.classList.add('hidden');
-    mainApp.classList.remove('hidden');
-    currentUserDisplay.innerHTML = `<i class="fas fa-user-circle"></i> ${authUser}`;
-    loadFavorites();
-    fetchUsers();
-    addUIFeedback(document.getElementById('registerBtn'));
-});
-document.getElementById('logoutBtn').addEventListener('click', () => {
-    localStorage.removeItem('friendfinder_user');
-    authUser = null;
-    authContainer.classList.remove('hidden');
-    mainApp.classList.add('hidden');
-    allUsers = [];
-    filteredUsers = [];
-    favorites.clear();
-    addUIFeedback(document.getElementById('logoutBtn'));
-});
-
-initAuth();
