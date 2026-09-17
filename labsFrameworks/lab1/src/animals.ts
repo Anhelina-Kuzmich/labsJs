@@ -37,3 +37,11 @@ class Fish implements Animal {
     console.log(`${this.name} swims underwater.`);
   }
 }
+
+const myCat = new Cat("Barsik", "Meat", 20);
+const myBird = new Bird("Kesha", "Seeds", true);
+const myFish = new Fish("Nemo", "Algae", 50);
+
+myCat.move();
+myBird.move();
+myFish.move();

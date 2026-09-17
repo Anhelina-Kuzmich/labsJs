@@ -13,7 +13,8 @@ class IceCreamMaker {
   }
 
   public calculatePrice(): void {
-    let size = prompt("Оберіть розмір (small/large):")?.toLowerCase() || "";
+    console.log("Оберіть розмір (small/large): large");
+    let size = "large";
 
     if (!this.menu[size] || (size !== "small" && size !== "large")) {
       console.log("Помилка: Невірний розмір.");
@@ -21,10 +22,11 @@ class IceCreamMaker {
     }
 
     let total = this.menu[size];
-
-    let toppingsInput = prompt(
-      "Введіть начинки через кому (chocolate, caramel, berries, marshmallow):"
+    console.log(
+      "Введіть начинки через кому (chocolate, caramel, berries, marshmallow): chocolate, marshmallow"
     );
+    let toppingsInput = "chocolate, marshmallow";
+
     if (toppingsInput) {
       let toppings = toppingsInput
         .split(",")
@@ -43,3 +45,4 @@ class IceCreamMaker {
 
 const order = new IceCreamMaker();
 order.addComponent("nuts", 8);
+order.calculatePrice();
